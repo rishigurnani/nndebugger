@@ -104,28 +104,20 @@ class DebugSession:
     
     def test_input_independent_baseline(self, model):
         print('\nChecking input-independent baseline', flush=True)
+        zero_model = copy.deepcopy(model) # deepcopy the model before training
         loss_history = self.trainer(model, self.data_set['train'], 
-        self.BS, self.LR, k.DL_DBG_IIB_EPOCHS, self.device, self.loss_fn
+            self.BS, self.LR, k.DL_DBG_IIB_EPOCHS, self.device, self.loss_fn
         )
         print('..last epoch real_data_loss', loss_history[-1], flush=True) #loss for all points in 5th epoch gets printed
 
-        zero_loader = DataLoader(self.zero_data_set, batch_size=self.BS, shuffle=True)
-        zero_optimizer = optim.Adam(zero_model.parameters(), lr=self.LR) #Adam optimization
-        zero_model.train()
-        for epoch in range(k.DL_DBG_IIB_EPOCHS):
-            zero_data_loss = 0
-            for ind, data in enumerate(zero_loader): #loop through training batches
-                data = data.to(self.device)
-                zero_optimizer.zero_grad()
-                output = self.get_model_output(zero_model,data)
-                loss = self.loss_fn(output, data)
-                zero_data_loss += loss.detach().cpu().numpy()
-                loss.backward()
-                zero_optimizer.step()
-        print('..last epoch zero_data_loss', zero_data_loss, flush=True) #loss for all points in 5th epoch gets printed
-        if zero_data_loss < real_data_loss:
+        zero_loss_history = self.trainer(zero_model, self.zero_data_set, 
+            self.BS, self.LR, k.DL_DBG_IIB_EPOCHS, self.device, self.loss_fn
+        )
+        print('..last epoch zero_data_loss', zero_loss_history[-1], flush=True) #loss for all points in 5th epoch gets printed
+        if zero_loss_history[-1] < loss_history[-1]:
             raise ValueError('The loss of zeroed inputs is less than the loss of \
-                    real input. This may indicate that your model is not learning anything.')
+                    real input. This may indicate that your model is not learning anything \
+                    during training. Check your trainer function and your model architecture.')
         print('Input-independent baseline is verified\n', flush=True)
     
     def test_overfit_small_batch(self, model):
