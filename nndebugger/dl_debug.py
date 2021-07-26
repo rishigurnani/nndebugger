@@ -59,7 +59,8 @@ class DebugSession:
         if self.selector_dim:
             output = model(data).view(data.num_graphs,self.selector_dim)
         else:
-            output = model(data).view(data.num_graphs,)
+            # output = model(data).view(data.num_graphs,)
+            output = model(data)
         return output  
     
     def test_target_abs_mean(self, model, target_abs_mean):
@@ -87,9 +88,7 @@ class DebugSession:
         loss.backward()
 
     def test_output_shape(self):
-        # print('output shape', self.output.shape)
-        # print('y shape', self.data.y.shape)
-        assert self.output.shape == self.data.y.shape
+        assert (self.output.shape == self.data.y.shape), f"The model output shape {self.output.shape} and label shape {self.data.y.shape} are not the same"
         print('\nVerified that shape of model predictions is equal to shape of labels\n', flush=True)
 
     def grad_check(self, model, file_name):
@@ -304,7 +303,7 @@ class DebugSession:
         self.non_negative = self.is_non_negative()
         self.target_abs_mean = stack([x.y for x in self.data_set['train']]
                                     ).abs().mean().item()
-        print('\ntarget_abs_mean %s \n' %self.target_abs_mean, flush=True)
+        # print('\ntarget_abs_mean %s \n' %self.target_abs_mean, flush=True)
         self.test_target_abs_mean(min_model, self.target_abs_mean)
         if self.do_test_output_shape:
             self.test_output_shape()
