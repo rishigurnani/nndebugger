@@ -1,4 +1,5 @@
-
+from torch_geometric.data import DataLoader
+from torch import optim
 
 def unit_sequence(input_dim, output_dim, n_hidden):
     '''
@@ -18,3 +19,23 @@ def unit_sequence(input_dim, output_dim, n_hidden):
     sequence.append(output_dim)
     
     return sequence
+
+def trainer(model, data_set, batch_size, learning_rate, n_epochs, device, loss_obj):
+    
+    data_loader = DataLoader(data_set, batch_size=batch_size, shuffle=True)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate) # Adam optimization
+    model.train() # set model to train mode
+    loss_history = []
+    for epoch in range(n_epochs):
+        per_epoch_loss = 0
+        for ind, data in enumerate(data_loader): # loop through training batches
+            data = data.to(device) # send data to GPU, if available
+            optimizer.zero_grad() # zero the gradients
+            output = model(data) # perform forward pass
+            loss = loss_obj(output, data) # compute loss
+            per_epoch_loss += loss.detach().cpu().numpy()
+            loss.backward() # perform backward pass
+            optimizer.step() # update weights
+        loss_history.append(per_epoch_loss)
+    
+    return loss_history

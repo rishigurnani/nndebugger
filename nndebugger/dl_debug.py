@@ -17,7 +17,7 @@ class DebugSession:
     def __init__(self, model_type, model_class_ls, complexity_ls, data_set, zero_data_set, loss_fn, epsilon,
                  device, target_abs_mean_test=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
                  do_test_overfit_small_batch=False, do_visualize_large_batch_training=False, do_chart_dependencies=False,
-                 do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=1000):
+                 do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=1000, trainer=utils.trainer):
         
         self.do_test_output_shape = do_test_output_shape
         self.do_test_input_independent_baseline = do_test_input_independent_baseline
@@ -27,6 +27,7 @@ class DebugSession:
         self.do_choose_model_size_by_overfit = do_choose_model_size_by_overfit
         self.model_class_ls = model_class_ls
         self.model_type = model_type # should be 'gnn' for graph neural network or 'mlp' for multi-layer perceptron
+        self.trainer = trainer
         if self.model_type not in ['gnn', 'mlp']:
             raise ValueError("'model_type' can only be 'gnn' or 'mlp'.")
         
@@ -103,27 +104,10 @@ class DebugSession:
     
     def test_input_independent_baseline(self, model):
         print('\nChecking input-independent baseline', flush=True)
-        zero_model = copy.deepcopy(model)
-        train_loader = DataLoader(self.data_set['train'], batch_size=self.BS, shuffle=True)
-        model.train()
-        optimizer = optim.Adam(model.parameters(), lr=self.LR) #Adam optimization
-
-        for epoch in range(k.DL_DBG_IIB_EPOCHS):
-            real_data_loss = 0
-            for ind, data in enumerate(train_loader): #loop through training batches
-                data = data.to(self.device)
-                optimizer.zero_grad()
-                output = self.get_model_output(model,data)
-                if ind == 0:
-                    print('....Epoch %s predictions' %epoch, 
-                          output.detach().cpu()
-                          .numpy()[0:k.DL_DBG_IIB_NSHOW]
-                         )
-                loss = self.loss_fn(output, data)
-                real_data_loss += loss.detach().cpu().numpy()
-                # loss.backward()
-                optimizer.step()
-        print('..last epoch real_data_loss', real_data_loss, flush=True) #loss for all points in 5th epoch gets printed
+        loss_history = self.trainer(model, self.data_set['train'], 
+        self.BS, self.LR, k.DL_DBG_IIB_EPOCHS, self.device, self.loss_fn
+        )
+        print('..last epoch real_data_loss', loss_history[-1], flush=True) #loss for all points in 5th epoch gets printed
 
         zero_loader = DataLoader(self.zero_data_set, batch_size=self.BS, shuffle=True)
         zero_optimizer = optim.Adam(zero_model.parameters(), lr=self.LR) #Adam optimization
