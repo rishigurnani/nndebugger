@@ -121,7 +121,7 @@ class DebugSession:
                          )
                 loss = self.loss_fn(output, data)
                 real_data_loss += loss.detach().cpu().numpy()
-                loss.backward()
+                # loss.backward()
                 optimizer.step()
         print('..last epoch real_data_loss', real_data_loss, flush=True) #loss for all points in 5th epoch gets printed
 
