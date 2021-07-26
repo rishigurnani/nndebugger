@@ -9,7 +9,8 @@ DL_DBG_BS_PCT = .125 # batch size = floor{(trainset size)*DL_DBG_BS}
 DL_DBG_DO_TEST_MEAN = False
 DL_DBG_TEST_MEAN_BS = 10
 DL_DBG_TEST_MEAN_EPS = 0.1
-DL_DBG_IIB_EPOCHS = 5 # IIB = input independent baseline
+DL_DBG_IIB_EPOCHS = 25 # IIB = input independent baseline
+DL_DBG_IIB_THRESHOLD = .75 # the factor, k = (real_data_loss / zero_data_loss), below which the IIB test will pass
 DL_DBG_IIB_NSHOW = 5
 DL_DBG_OVERFIT_BS = 5
 DL_DBG_OVERFIT_EPOCHS = 200
