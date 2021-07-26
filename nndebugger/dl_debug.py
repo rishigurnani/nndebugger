@@ -123,6 +123,7 @@ class DebugSession:
     
     def test_overfit_small_batch(self, model):
         print('\nChecking if a small batch can be overfit', flush=True)
+        print(f'epsilon is {self.EPSILON}')
         train_loader = DataLoader(self.data_set['train'][0:k.DL_DBG_OVERFIT_BS], 
                                   batch_size=k.DL_DBG_OVERFIT_BS, shuffle=True)
         optimizer = optim.Adam(model.parameters(), lr=self.LR) #Adam optimization
@@ -145,8 +146,9 @@ class DebugSession:
                         overfit = True
 
         if not overfit:
-            raise ValueError('Error: Your model was not able to overfit a small batch of data')
-        print('Verified that a small batch can be overfit\n', flush=True)
+            raise ValueError(f'''Error: Your model was not able to overfit a small batch 
+                               of data. The minimum RMSE over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not less than {self.EPSILON}''')
+        print(f'Verified that a small batch can be overfit since the RMSE was less than {self.EPSILON}\n', flush=True)
 
     def visualize_large_batch_training(self, model):
         print('\nStarting visualization of training on one large batch', flush=True)
