@@ -115,9 +115,9 @@ class DebugSession:
         )
         print('..last epoch zero_data_loss', zero_loss_history[-1], flush=True) #loss for all points in 5th epoch gets printed
         if (loss_history[-1]/zero_loss_history[-1] >= k.DL_DBG_IIB_THRESHOLD):
-            raise ValueError('The loss of zeroed inputs is nearly the same as the loss of \
-                    real inputs. This may indicate that your model is not learning anything \
-                    during training. Check your trainer function and your model architecture.'
+            raise ValueError('''The loss of zeroed inputs is nearly the same as the loss of
+                    real inputs. This may indicate that your model is not learning anything
+                    during training. Check your trainer function and your model architecture.'''
                 )
         print('Input-independent baseline is verified\n', flush=True)
     
