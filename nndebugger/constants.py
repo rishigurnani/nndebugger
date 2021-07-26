@@ -1,10 +1,7 @@
 # Constants for dl_debug (DL_DBG)
-DL_DBG = False # if True, debugging will be done
+RANDOM_SEED = 0
 TRAIN_FRAC = 0.8
-if DL_TEST:
-    DL_DBG_MAX_EPOCHS = 1000
-else:
-    DL_DBG_MAX_EPOCHS = 1000
+DL_DBG_MAX_EPOCHS = 1000
 DL_DBG_LR = .1
 DL_DBG_OVERFIT_EPS_RATIO = .1 # epsilon = 
                           # DL_DBG_OVERFIT_EPS_RATIO*(mean of target)

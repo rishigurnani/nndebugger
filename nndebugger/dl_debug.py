@@ -5,7 +5,7 @@ from torch_geometric.data import DataLoader
 import copy
 
 from . import torch_utils as utils
-import constants as k
+from . import constants as k
 
 dtype = cuda.FloatTensor
 # fix random seeds
@@ -15,7 +15,16 @@ np.random.seed(k.RANDOM_SEED)
 
 class DebugSession:
     def __init__(self, model_type, model_class_ls, complexity_ls, data_set, zero_data_set, loss_fn, epsilon,
-                 device, target_abs_mean_test=False, choose_model=True, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=1000):
+                 device, target_abs_mean_test=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
+                 do_test_overfit_small_batch=False, do_visualize_large_batch_training=False, do_chart_dependencies=False,
+                 do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=1000):
+        
+        self.do_test_output_shape = do_test_output_shape
+        self.do_test_input_independent_baseline = do_test_input_independent_baseline
+        self.do_test_overfit_small_batch = do_test_overfit_small_batch
+        self.do_visualize_large_batch_training = do_visualize_large_batch_training
+        self.do_chart_dependencies = do_chart_dependencies
+        self.do_choose_model_size_by_overfit = do_choose_model_size_by_overfit
         self.model_class_ls = model_class_ls
         self.model_type = model_type # should be 'gnn' for graph neural network or 'mlp' for multi-layer perceptron
         if self.model_type not in ['gnn', 'mlp']:
@@ -30,11 +39,8 @@ class DebugSession:
         self.zero_data_set = zero_data_set
         self.device = device
         self.target_abs_mean_test = target_abs_mean_test
-        if self.target_abs_mean_test is False:
-            print('Skipping test_target_abs_mean', flush=True)
-        self.choose_model = choose_model
-        if self.choose_model is False:
-            print('Skipping chart_dependencies', flush=True)
+        # if self.target_abs_mean_test is False:
+        #     print('Skipping test_target_abs_mean', flush=True)
         self.LR = LR
         self.BS = BS
         self.CHOOSE_MODEL_EPOCHS = CHOOSE_MODEL_EPOCHS
@@ -81,6 +87,8 @@ class DebugSession:
         loss.backward()
 
     def test_output_shape(self):
+        # print('output shape', self.output.shape)
+        # print('y shape', self.data.y.shape)
         assert self.output.shape == self.data.y.shape
         print('\nVerified that shape of model predictions is equal to shape of labels\n', flush=True)
 
@@ -294,40 +302,41 @@ class DebugSession:
         min_model = self.model_class_ls[0]() #instantiate model
         min_model.to(self.device)
         self.non_negative = self.is_non_negative()
-        self.target_abs_mean = stack([x.y for x in 
-                                            self.data_set['train']]
-                                          ).abs().mean().item()
+        self.target_abs_mean = stack([x.y for x in self.data_set['train']]
+                                    ).abs().mean().item()
         print('\ntarget_abs_mean %s \n' %self.target_abs_mean, flush=True)
         self.test_target_abs_mean(min_model, self.target_abs_mean)
-        self.test_output_shape()
-        self.grad_check(min_model, file_name='first_grad_check.png')
-        print('\nSet of gradients plotted to first_grad_check.png\n', flush=True)
+        if self.do_test_output_shape:
+            self.test_output_shape()
+        # self.grad_check(min_model, file_name='first_grad_check.png')
+        # print('\nSet of gradients plotted to first_grad_check.png\n', flush=True)
 
         min_model = self.model_class_ls[0]() #re-instantiate model
         min_model.to(self.device)
-
-        self.test_input_independent_baseline(min_model)
+        if self.do_test_input_independent_baseline:
+            self.test_input_independent_baseline(min_model)
 
         min_model = self.model_class_ls[0]() #re-instantiate model
         min_model.to(self.device)
         if self.is_non_negative and hasattr(min_model, 'init_bias'):
             min_model.init_bias(self.target_abs_mean)
 
-        self.test_overfit_small_batch(min_model)
+        if self.do_test_overfit_small_batch:
+            self.test_overfit_small_batch(min_model)
 
         min_model = self.model_class_ls[0]() #re-instantiate model
         min_model.to(self.device)
-
-        self.visualize_large_batch_training(min_model)
-        self.grad_check(min_model, file_name='second_grad_check.png')
-        print('\nSet of gradients plotted to second_grad_check.png\n', flush=True)
+        if self.do_visualize_large_batch_training:
+            self.visualize_large_batch_training(min_model)
+        # self.grad_check(min_model, file_name='second_grad_check.png')
+        # print('\nSet of gradients plotted to second_grad_check.png\n', flush=True)
 
         min_model = self.model_class_ls[0]() #re-instantiate model
         min_model.to(self.device)
+        if self.do_chart_dependencies:
+            self.chart_dependencies(min_model)
 
-        self.chart_dependencies(min_model)
-
-        if self.choose_model:
+        if self.do_choose_model_size_by_overfit:
             best_model = self.choose_model_size_by_overfit()
         else:
             best_model = None
