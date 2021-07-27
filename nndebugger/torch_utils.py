@@ -1,5 +1,7 @@
 from torch_geometric.data import DataLoader
 from torch import optim
+import numpy as np
+import sklearn as sk
 
 def unit_sequence(input_dim, output_dim, n_hidden):
     '''
@@ -19,6 +21,19 @@ def unit_sequence(input_dim, output_dim, n_hidden):
     sequence.append(output_dim)
     
     return sequence
+
+def compute_regression_metrics(y, y_hat, mt):
+
+    if mt:
+        y = np.array(y)
+        y_hat = np.array(y_hat)
+        keep_inds = np.flatnonzero(y + 999)
+        y_hat = y_hat[keep_inds]
+        y = y[keep_inds]
+
+    rmse = np.sqrt(sk.metrics.mean_squared_error(y,y_hat))
+    r2 = sk.metrics.r2_score(y,y_hat)
+    return rmse, r2
 
 def trainer(model, data_set, batch_size, learning_rate, n_epochs, device, loss_obj):
     

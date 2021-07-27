@@ -1,7 +1,7 @@
 # Constants for dl_debug (DL_DBG)
 RANDOM_SEED = 0
 TRAIN_FRAC = 0.8
-DL_DBG_MAX_EPOCHS = 1000
+DL_DBG_MAX_EPOCHS = 100
 DL_DBG_LR = .5
 DL_DBG_OVERFIT_EPS_RATIO = .05 # epsilon = 
                           # DL_DBG_OVERFIT_EPS_RATIO*(mean of target)
@@ -20,3 +20,4 @@ DL_DBG_CHART_BS = 5
 DL_DBG_CMS_NSHOW = 10 # CMS = Choose Model Size by overfit
 DL_DBG_NDECIMALS = 4
 DL_DBG_SUFFICIENT_R2 = .99
+SAVE_GRAD_IMG = False

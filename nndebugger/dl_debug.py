@@ -17,7 +17,7 @@ class DebugSession:
     def __init__(self, model_type, model_class_ls, complexity_ls, data_set, zero_data_set, loss_fn, epsilon,
                  device, target_abs_mean_test=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
                  do_test_overfit_small_batch=False, do_visualize_large_batch_training=False, do_chart_dependencies=False,
-                 do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=1000, trainer=utils.trainer):
+                 do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=k.DL_DBG_MAX_EPOCHS, trainer=utils.trainer):
         
         self.do_test_output_shape = do_test_output_shape
         self.do_test_input_independent_baseline = do_test_input_independent_baseline
