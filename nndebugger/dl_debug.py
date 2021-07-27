@@ -205,6 +205,7 @@ class DebugSession:
         else:
             raise ValueError("Invalid 'model_type' selected")
         if data.x.grad[start_ind:,:].sum().item() != 0:
+            # print(data.x.grad)
             raise ValueError('Data is getting passed along the batch dimension.')
         
         print('Finished charting dependencies. Data is not getting passed along the batch dimension.\n', flush=True)
