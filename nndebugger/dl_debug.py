@@ -14,7 +14,7 @@ manual_seed(k.RANDOM_SEED)
 np.random.seed(k.RANDOM_SEED)
 
 class DebugSession:
-    def __init__(self, model_type, model_class_ls, complexity_ls, data_set, zero_data_set, loss_fn, epsilon,
+    def __init__(self, model_type, model_class_ls, capacity_ls, data_set, zero_data_set, loss_fn, epsilon,
                  device, target_abs_mean_test=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
                  do_test_overfit_small_batch=False, do_visualize_large_batch_training=False, do_chart_dependencies=False,
                  do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=k.DL_DBG_MAX_EPOCHS, trainer=utils.trainer):
@@ -48,7 +48,7 @@ class DebugSession:
         self.EPSILON = epsilon
         self.loss_fn = loss_fn
         self.selector_dim = None
-        self.complexity_ls = complexity_ls
+        self.capacity_ls = capacity_ls
         if self.data_set['train'][0].__contains__('selector'):
             self.selector_dim = self.data_set['train'][0].selector.size()[-1]
         if self.selector_dim:
@@ -206,9 +206,9 @@ class DebugSession:
             raise ValueError("Invalid 'model_type' selected")
         if data.x.grad[start_ind:,:].sum().item() != 0:
             # print(data.x.grad)
-            raise ValueError('Data is getting passed along the batch dimension.')
+            raise ValueError('Data is getting mixed between instances in the same batch.')
         
-        print('Finished charting dependencies. Data is not getting passed along the batch dimension.\n', flush=True)
+        print('Finished charting dependencies. Data is not getting mixed between instances in the same batch.\n', flush=True)
 
     def choose_model_size_by_overfit(self):
         print('\nBeginning model size search', flush=True)
@@ -270,7 +270,7 @@ class DebugSession:
                 max_best_r2 = max_r2
                 best_model_n = model_n
         print('Finished model size search. Index of best model is %s\n' %best_model_n, flush=True)
-        return self.complexity_ls[best_model_n]
+        return self.capacity_ls[best_model_n]
     
     def is_non_negative(self):
         tensor = stack([x.y for x in self.data_set['train']])
