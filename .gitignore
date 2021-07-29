@@ -144,6 +144,3 @@ cython_debug/
 
 # Out files
 *.out
-
-# Images
-*.png
