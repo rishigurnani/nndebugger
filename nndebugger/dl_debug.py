@@ -15,7 +15,7 @@ np.random.seed(k.RANDOM_SEED)
 
 class DebugSession:
     def __init__(self, model_type, model_class_ls, capacity_ls, data_set, zero_data_set, loss_fn, epsilon,
-                 device, target_abs_mean_test=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
+                 device, target_abs_mean_test=False, do_all_tests=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
                  do_test_overfit_small_batch=False, do_visualize_large_batch_training=False, do_chart_dependencies=False,
                  do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=k.DL_DBG_MAX_EPOCHS, trainer=utils.trainer):
         
@@ -25,6 +25,13 @@ class DebugSession:
         self.do_visualize_large_batch_training = do_visualize_large_batch_training
         self.do_chart_dependencies = do_chart_dependencies
         self.do_choose_model_size_by_overfit = do_choose_model_size_by_overfit
+        if do_all_tests:
+            self.do_test_output_shape = True
+            self.do_test_input_independent_baseline = True
+            self.do_test_overfit_small_batch = True
+            self.do_visualize_large_batch_training = True
+            self.do_chart_dependencies = True
+            self.do_choose_model_size_by_overfit = True            
         self.model_class_ls = model_class_ls
         self.model_type = model_type # should be 'gnn' for graph neural network or 'mlp' for multi-layer perceptron
         self.trainer = trainer
