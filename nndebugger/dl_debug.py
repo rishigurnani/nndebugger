@@ -310,7 +310,7 @@ class DebugSession:
                 min_best_rmse = min_rmse
                 max_best_r2 = max_r2
                 best_model_n = model_n
-        print('Finished model size search. Index of best model is %s\n' %best_model_n, flush=True)
+        print('Finished model size search. The optimal capacity is %s\n' %self.capacity_ls[best_model_n], flush=True)
         return self.capacity_ls[best_model_n]
     
     def is_non_negative(self):
