@@ -14,7 +14,7 @@ manual_seed(k.RANDOM_SEED)
 np.random.seed(k.RANDOM_SEED)
 
 class DebugSession:
-    def __init__(self, model_class_ls, model_type, capacity_ls, data_set, zero_data_set, loss_fn, epsilon,
+    def __init__(self, model_class_ls, model_type, capacity_ls, data_set, zero_data_set, loss_fn,
                  device, target_abs_mean_test=False, do_all_tests=False, do_test_output_shape=False, do_test_input_independent_baseline=False,
                  do_test_overfit_small_batch=False, do_visualize_large_batch_training=False, do_chart_dependencies=False,
                  do_choose_model_size_by_overfit=False, LR=.001, BS=124, CHOOSE_MODEL_EPOCHS=k.DL_DBG_MAX_EPOCHS, trainer=utils.trainer):
@@ -35,9 +35,6 @@ class DebugSession:
         loss_fn - An nn.Module instance. The instance should have
         a forward method that takes in two arguments, 'predictions' and
         'data'. The forward method should return a scalar. 
-
-        epsilon - A scalar. When the loss is less than this value, data
-        is considered 'overfit'.
 
         device - A PyTorch device.
 
@@ -85,7 +82,6 @@ class DebugSession:
         self.LR = LR
         self.BS = BS
         self.CHOOSE_MODEL_EPOCHS = CHOOSE_MODEL_EPOCHS
-        self.EPSILON = epsilon
         self.loss_fn = loss_fn
         self.selector_dim = None
         self.capacity_ls = capacity_ls
