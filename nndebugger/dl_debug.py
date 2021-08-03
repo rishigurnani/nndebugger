@@ -360,7 +360,7 @@ class DebugSession:
             best_model = self.choose_model_size_by_overfit()
         else:
             best_model = None
-        print('\nDebug session complete.', flush=True)
+        print('\nDebug session complete. No errors detected.', flush=True)
         return best_model    
 
 def format_array_of_floats(prefix, arr):
