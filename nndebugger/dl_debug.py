@@ -184,7 +184,7 @@ class DebugSession:
                     print( format_array_of_floats('....Outputs', y_hat) )
                     print( format_array_of_floats('....Labels ', y) )
                     r2, _ = utils.compute_regression_metrics(y, y_hat, self.mt)
-                    if r2 > k.constants.DL_DBG_SUFFICIENT_R2_SMALL_BATCH:
+                    if r2 > k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH:
                         overfit = True
 
         if not overfit:
