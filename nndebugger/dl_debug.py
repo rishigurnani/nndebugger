@@ -177,20 +177,21 @@ class DebugSession:
                     loss = self.loss_fn(output, data)
                     loss.backward()
                     optimizer.step()
-                    print('..Epoch', epoch)
-                    print('....Loss:', np.sqrt(loss.item()))
                     y = data.y.flatten().detach().cpu().numpy()
                     y_hat = output.flatten().detach().cpu().numpy()
+                    _, r2 = utils.compute_regression_metrics(y, y_hat, self.mt)
+                    print('..Epoch', epoch)
                     print( format_array_of_floats('....Outputs', y_hat) )
                     print( format_array_of_floats('....Labels ', y) )
-                    r2, _ = utils.compute_regression_metrics(y, y_hat, self.mt)
+                    print('....Loss:', np.sqrt(loss.item()))
+                    print('....R2:', r2)
                     if r2 > k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH:
                         overfit = True
 
         if not overfit:
             raise ValueError(f'''Error: Your model was not able to overfit a small batch 
-                               of data. The minimum RMSE over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not less than {self.EPSILON}''')
-        print(f'Verified that a small batch can be overfit since the RMSE was less than {self.EPSILON}\n', flush=True)
+                               of data. The maximum R2 over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}''')
+        print(f'Verified that a small batch can be overfit since the R2 was greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}\n', flush=True)
 
     def visualize_large_batch_training(self, model):
         print('\nStarting visualization of training on one large batch', flush=True)
