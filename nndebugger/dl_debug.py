@@ -28,8 +28,7 @@ class DebugSession:
         in model_class_ls or 'gnn' if graph neural-networks are contained 
         in model_class_ls
         
-        data_set - A dictionary. Keys should include 'train'. The value 
-        associated with 'train' should be a list of Data instances. Each
+        data_set - A list of Data instances. Each
         Data instance should at least have an attribute 'x' which points
         to features and an attribute 'y' which points to the label
         
@@ -73,10 +72,10 @@ class DebugSession:
             raise ValueError("'model_type' can only be 'gnn' or 'mlp'.")
         
         self.data_set = data_set
-        if type(self.data_set) != dict:
-            raise TypeError("'data_set' must be a Python Dictionary")
+        if type(self.data_set) != list:
+            raise TypeError("'data_set' must be a Python list")
         
-        self.training_size = len(data_set['train'])
+        self.training_size = len(data_set)
         print(f"Training data contains {self.training_size} points\n")
         self.zero_data_set = zero_data_set
         self.device = device
@@ -90,8 +89,8 @@ class DebugSession:
         self.loss_fn = loss_fn
         self.selector_dim = None
         self.capacity_ls = capacity_ls
-        if self.data_set['train'][0].__contains__('selector'):
-            self.selector_dim = self.data_set['train'][0].selector.size()[-1]
+        if self.data_set[0].__contains__('selector'):
+            self.selector_dim = self.data_set[0].selector.size()[-1]
         if self.selector_dim:
             self.mt = True
         else:
@@ -110,7 +109,7 @@ class DebugSession:
         if hasattr(model, 'init_bias'):
             model.init_bias(target_abs_mean)
         optimizer = optim.Adam(model.parameters(), lr=self.LR) #Adam optimization
-        train_loader = DataLoader(self.data_set['train'], 
+        train_loader = DataLoader(self.data_set, 
                                   batch_size=k.DL_DBG_TEST_MEAN_BS, 
                                   shuffle=True)
         model.train()
@@ -146,7 +145,7 @@ class DebugSession:
     def test_input_independent_baseline(self, model):
         print('\nChecking input-independent baseline', flush=True)
         zero_model = copy.deepcopy(model) # deepcopy the model before training
-        loss_history = self.trainer(model, self.data_set['train'], 
+        loss_history = self.trainer(model, self.data_set, 
             self.BS, self.LR, k.DL_DBG_IIB_EPOCHS, self.device, self.loss_fn
         )
         print('..last epoch real_data_loss', loss_history[-1], flush=True) #loss for all points in 5th epoch gets printed
@@ -165,7 +164,7 @@ class DebugSession:
     def test_overfit_small_batch(self, model):
         print('\nChecking if a small batch can be overfit', flush=True)
         print(f'epsilon is {self.EPSILON}')
-        train_loader = DataLoader(self.data_set['train'][0:k.DL_DBG_OVERFIT_BS], 
+        train_loader = DataLoader(self.data_set[0:k.DL_DBG_OVERFIT_BS], 
                                   batch_size=k.DL_DBG_OVERFIT_BS, shuffle=True)
         optimizer = optim.Adam(model.parameters(), lr=self.LR) #Adam optimization
         model.train()
@@ -193,7 +192,7 @@ class DebugSession:
 
     def visualize_large_batch_training(self, model):
         print('\nStarting visualization of training on one large batch', flush=True)
-        train_loader = DataLoader(self.data_set['train'], batch_size=k.DL_DBG_VIS_BS, shuffle=False)
+        train_loader = DataLoader(self.data_set, batch_size=k.DL_DBG_VIS_BS, shuffle=False)
         optimizer = optim.Adam(model.parameters(), lr=self.LR) #Adam optimization
         model.train()
         min_loss = np.inf
@@ -219,7 +218,7 @@ class DebugSession:
     def chart_dependencies(self, model):
         print('\nBeginning to chart dependencies', flush=True)
     
-        train_loader = DataLoader(self.data_set['train']
+        train_loader = DataLoader(self.data_set
                                   [0:k.DL_DBG_CHART_NSHOW], 
                                   batch_size=k.DL_DBG_CHART_BS, 
                                   shuffle=False)
@@ -240,7 +239,7 @@ class DebugSession:
                 print('....Loss:', loss.item(), flush=True)
 
         if self.model_type is 'gnn':
-            start_ind = self.data_set['train'][0].x.shape[0] #the number of nodes in the first connected graph
+            start_ind = self.data_set[0].x.shape[0] #the number of nodes in the first connected graph
         elif self.model_type is 'mlp':
             start_ind = 1
         else:
@@ -254,8 +253,8 @@ class DebugSession:
     def choose_model_size_by_overfit(self):
         print('\nBeginning model size search', flush=True)
 
-        N_TRAIN_DATA = len(self.data_set['train'])
-        train_loader = DataLoader(self.data_set['train'], batch_size=self.BS, shuffle=False)
+        N_TRAIN_DATA = len(self.data_set)
+        train_loader = DataLoader(self.data_set, batch_size=self.BS, shuffle=False)
 
         min_best_rmse = np.inf
         max_best_r2 = -np.inf
@@ -314,7 +313,7 @@ class DebugSession:
         return self.capacity_ls[best_model_n]
     
     def is_non_negative(self):
-        tensor = stack([x.y for x in self.data_set['train']])
+        tensor = stack([x.y for x in self.data_set])
         return (tensor >= 0).all().item()
 
     def main(self):
@@ -322,7 +321,7 @@ class DebugSession:
         min_model = self.model_class_ls[0]() #instantiate model
         min_model.to(self.device)
         self.non_negative = self.is_non_negative()
-        self.target_abs_mean = stack([x.y for x in self.data_set['train']]
+        self.target_abs_mean = stack([x.y for x in self.data_set]
                                     ).abs().mean().item()
         # print('\ntarget_abs_mean %s \n' %self.target_abs_mean, flush=True)
         self.test_target_abs_mean(min_model, self.target_abs_mean)
