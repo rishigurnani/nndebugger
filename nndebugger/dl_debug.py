@@ -180,9 +180,12 @@ class DebugSession:
                     optimizer.step()
                     print('..Epoch', epoch)
                     print('....Loss:', np.sqrt(loss.item()))
-                    print( format_array_of_floats('....Outputs', output.flatten().detach().cpu().numpy()) )
-                    print( format_array_of_floats('....Labels ', data.y.flatten().detach().cpu().numpy()) )
-                    if np.sqrt(loss.item()) < self.EPSILON:
+                    y = data.y.flatten().detach().cpu().numpy()
+                    y_hat = output.flatten().detach().cpu().numpy()
+                    print( format_array_of_floats('....Outputs', y_hat) )
+                    print( format_array_of_floats('....Labels ', y) )
+                    r2, _ = utils.compute_regression_metrics(y, y_hat, self.mt)
+                    if r2 > k.constants.DL_DBG_SUFFICIENT_R2_SMALL_BATCH:
                         overfit = True
 
         if not overfit:
@@ -303,7 +306,7 @@ class DebugSession:
                 print('..Plotting of gradients skipped')
             if min_rmse > min_best_rmse: # exit model testing loop if we did not improve 
                 break
-            elif max_best_r2 > k.DL_DBG_SUFFICIENT_R2: # exit model testing loop if this model did good enough
+            elif max_best_r2 > k.DL_DBG_SUFFICIENT_R2_ALL_DATA: # exit model testing loop if this model did good enough
                 break
             else:
                 min_best_rmse = min_rmse
