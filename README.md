@@ -1,5 +1,15 @@
 # NetDebugger
 
+## Dependencies
+### NNDebugger
+numpy
+PyTorch 1.7.1
+sklearn 0.24.1
+PyTorch Geometric. Installation instructions at https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html
+### Tutorial.ipynb
+pandas 1.1.5
+rdkit
+
 ## Example
 Run tutorial.ipynb
 
