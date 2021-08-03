@@ -1,6 +1,6 @@
 # NetDebugger
 
-## Quick Start
+## Example
 Run tutorial.ipynb
 
 ## Motivation
