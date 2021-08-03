@@ -163,7 +163,6 @@ class DebugSession:
     
     def test_overfit_small_batch(self, model):
         print('\nChecking if a small batch can be overfit', flush=True)
-        print(f'epsilon is {self.EPSILON}')
         train_loader = DataLoader(self.data_set[0:k.DL_DBG_OVERFIT_BS], 
                                   batch_size=k.DL_DBG_OVERFIT_BS, shuffle=True)
         optimizer = optim.Adam(model.parameters(), lr=self.LR) #Adam optimization
