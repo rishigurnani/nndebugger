@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+# jupyter tool
+#
+/usr/bin/invoke_app "$@" -t hubtoolshortname \
+                         -C "start_jupyter -t -A -T @tool tutorial.ipynb"  \ 
+                         -t netdebugger \
+                         -u anaconda-7
