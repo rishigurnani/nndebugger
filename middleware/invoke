@@ -3,7 +3,7 @@
 #
 # jupyter tool
 #
-/usr/bin/invoke_app "$@" -t hubtoolshortname \
+/usr/bin/invoke_app "$@" \
                          -C "start_jupyter -t -A -T @tool tutorial.ipynb"  \ 
                          -t netdebugger \
                          -u anaconda-7
