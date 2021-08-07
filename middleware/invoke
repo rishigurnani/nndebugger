@@ -4,6 +4,8 @@
 # jupyter tool
 #
 /usr/bin/invoke_app "$@" \
-                         -C "start_jupyter -t -A -T @tool tutorial.ipynb"  \ 
-                         -t netdebugger \
-                         -u anaconda-7
+-C "start_jupyter -t -T @tool tutorial.ipynb" \
+                           -t netdebugger \
+                           -u anaconda-7 \
+                           -w headless \
+                           -r none
