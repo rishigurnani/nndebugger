@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-setup(name='shared',
+setup(name='netdebugger',
       version='0.0.1',
       description='',
       author='Rishi Gurnani',
