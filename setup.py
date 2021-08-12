@@ -7,6 +7,6 @@ setup(name='shared',
       description='',
       author='Rishi Gurnani',
       author_email='rgurnani96@gatech.edu',
-      packages=find_packages(where=["nndebugger"]),
+      packages=find_packages(where="nndebugger"),
       license='LICENSE.txt',
     )
