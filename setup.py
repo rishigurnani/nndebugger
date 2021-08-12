@@ -9,4 +9,5 @@ setup(name='netdebugger',
       author_email='rgurnani96@gatech.edu',
       packages=find_packages(where="nndebugger"),
       license='LICENSE.txt',
+      package_dir={"": "nndebugger"}
     )
