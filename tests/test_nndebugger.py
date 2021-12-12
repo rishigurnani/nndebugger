@@ -14,9 +14,8 @@ from torch_geometric.data import Data
 
 # nndebugger functions
 from bin.nndebugger import constants, loss, dl_debug
-from bin.nndebugger import torch_utils as utils
 from bin.nndebugger import __version__
-from .utils_test import featurize_smiles, MyNet
+from .utils_test import featurize_smiles, MyNet, BuggyNet
 
 # set seeds for reproducibility
 random.seed(constants.RANDOM_SEED)
@@ -68,6 +67,9 @@ def example_data():
         'zero_data_set': [Data(x=zeros((1,n_features)), y=x.y) for x in train_X],
         'loss_fn': loss_fn,
         'device': torch_device('cuda' if cuda.is_available() else 'cpu'),
+        'buggy_model_class_ls': [
+            lambda : BuggyNet(n_features, 1, capacity) for capacity in capacity_ls
+        ]
     }
 
 def test_output_shape_pass(example_data):
@@ -85,3 +87,19 @@ def test_output_shape_pass(example_data):
         do_test_output_shape=True
     )
     ds.main()
+
+def test_output_shape_fail(example_data):
+    '''
+    This test should NOT pass since it uses a buggy model
+    '''
+    ds = dl_debug.DebugSession(
+        example_data['buggy_model_class_ls'], 
+        example_data['model_type'], 
+        example_data['capacity_ls'], 
+        example_data['data_set'], 
+        example_data['zero_data_set'], 
+        example_data['loss_fn'],
+        example_data['device'], 
+        do_test_output_shape=True
+    )
+    not ds.main()
