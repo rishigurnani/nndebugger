@@ -1,7 +1,7 @@
 import numpy as np
 from torch import cuda, manual_seed, optim, tensor, stack
 import random
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 import copy
 
 from . import torch_utils as utils
