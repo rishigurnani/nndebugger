@@ -24,7 +24,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 name = "certifi"
 version = "2021.10.8"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -32,7 +32,7 @@ python-versions = "*"
 name = "charset-normalizer"
 version = "2.0.9"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5.0"
 
@@ -43,7 +43,7 @@ unicode_backport = ["unicodedata2"]
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -51,7 +51,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "googledrivedownloader"
 version = "0.4"
 description = "Minimal class to download shared files from Google Drive."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -59,7 +59,7 @@ python-versions = "*"
 name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -92,7 +92,7 @@ python-versions = "*"
 name = "isodate"
 version = "0.6.0"
 description = "An ISO 8601 date/time/duration parser and formatter"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -103,7 +103,7 @@ six = "*"
 name = "jinja2"
 version = "3.0.3"
 description = "A very fast and expressive template engine."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -117,7 +117,7 @@ i18n = ["Babel (>=2.7)"]
 name = "joblib"
 version = "1.1.0"
 description = "Lightweight pipelining with Python functions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -125,7 +125,7 @@ python-versions = ">=3.6"
 name = "markupsafe"
 version = "2.0.1"
 description = "Safely add untrusted strings to HTML/XML markup."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -133,7 +133,7 @@ python-versions = ">=3.6"
 name = "networkx"
 version = "2.6.3"
 description = "Python package for creating and manipulating graphs and networks"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -167,7 +167,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 name = "pandas"
 version = "1.3.4"
 description = "Powerful data structures for data analysis, time series, and statistics"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7.1"
 
@@ -210,7 +210,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "pyparsing"
 version = "3.0.6"
 description = "Python parsing module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -243,7 +243,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 
@@ -254,7 +254,7 @@ six = ">=1.5"
 name = "pytz"
 version = "2021.3"
 description = "World timezone definitions, modern and historical"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -262,7 +262,7 @@ python-versions = "*"
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -270,7 +270,7 @@ python-versions = ">=3.6"
 name = "rdflib"
 version = "6.0.2"
 description = "RDFLib is a Python library for working with RDF, a simple yet powerful language for representing information."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -284,10 +284,21 @@ html = ["html5lib"]
 tests = ["html5lib", "networkx", "nose (==1.3.7)", "nose-timer", "coverage", "black (==21.6b0)", "flake8", "doctest-ignore-unicode (==0.1.2)"]
 
 [[package]]
+name = "rdkit-pypi"
+version = "2021.9.2.1"
+description = "A collection of chemoinformatics and machine-learning software written in C++ and Python"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = ">=1.19"
+
+[[package]]
 name = "requests"
 version = "2.26.0"
 description = "Python HTTP for Humans."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -305,7 +316,7 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 name = "scikit-learn"
 version = "1.0.1"
 description = "A set of python modules for machine learning and data mining"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
 
@@ -325,7 +336,7 @@ tests = ["matplotlib (>=2.2.3)", "scikit-image (>=0.14.5)", "pandas (>=0.25.0)",
 name = "scipy"
 version = "1.7.3"
 description = "SciPy: Scientific Library for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7,<3.11"
 
@@ -336,7 +347,7 @@ numpy = ">=1.16.5,<1.23.0"
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -344,7 +355,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "threadpoolctl"
 version = "3.0.0"
 description = "threadpoolctl"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -360,7 +371,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "torch"
 version = "1.9.1+cu102"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.2"
 
@@ -374,7 +385,7 @@ url = "https://download.pytorch.org/whl/cu102/torch-1.9.1%2Bcu102-cp37-cp37m-lin
 name = "torch-geometric"
 version = "2.0.2"
 description = "Graph Neural Network Library for PyTorch"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -400,7 +411,7 @@ test = ["pytest", "pytest-cov", "mock"]
 name = "torch-scatter"
 version = "2.0.9"
 description = "PyTorch Extension Library of Optimized Scatter Operations"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -414,7 +425,7 @@ url = "https://data.pyg.org/whl/torch-1.9.0%2Bcu102/torch_scatter-2.0.9-cp37-cp3
 name = "torch-sparse"
 version = "0.6.12"
 description = "PyTorch Extension Library of Optimized Autograd Sparse Matrix Operations"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -431,7 +442,7 @@ url = "https://data.pyg.org/whl/torch-1.9.0%2Bcu102/torch_sparse-0.6.12-cp37-cp3
 name = "tqdm"
 version = "4.62.3"
 description = "Fast, Extensible Progress Meter"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
@@ -447,7 +458,7 @@ telegram = ["requests"]
 name = "typing-extensions"
 version = "4.0.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -455,7 +466,7 @@ python-versions = ">=3.6"
 name = "urllib3"
 version = "1.26.7"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
@@ -468,7 +479,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 name = "yacs"
 version = "0.1.8"
 description = "Yet Another Configuration System"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -490,7 +501,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "3.7.3"
-content-hash = "f87189413d9b0b7eb4e126f480d79828c894594d396c9bd7c2cd545200373be6"
+content-hash = "9f3dcaa980ad570a005d00ae4dfc65022f9d9c164543c5ac30ea6518807ef214"
 
 [metadata.files]
 atomicwrites = [
@@ -740,6 +751,22 @@ pyyaml = [
 rdflib = [
     {file = "rdflib-6.0.2-py3-none-any.whl", hash = "sha256:b7642daac8cdad1ba157fecb236f5d1b2aa1de64e714dcee80d65e2b794d88a6"},
     {file = "rdflib-6.0.2.tar.gz", hash = "sha256:6136ae056001474ee2aff5fc5b956e62a11c3a9c66bb0f3d9c0aaa5fbb56854e"},
+]
+rdkit-pypi = [
+    {file = "rdkit_pypi-2021.9.2.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:157dd26be77f1c428507f3f1fea8e57d4d3009baf44c0b636b0b22e120784321"},
+    {file = "rdkit_pypi-2021.9.2.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:296d24a56eea3d3cca525a61334168be7808c0e5fad62b865639804b73a95723"},
+    {file = "rdkit_pypi-2021.9.2.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:4fe41e6ee7e24b308e52065774884f9056e64fb02f8458a55a191d1b23dbd519"},
+    {file = "rdkit_pypi-2021.9.2.1-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9d77cb64bfc9c662997999f83c814a3d7f47b404896cb5a2273c417cde39fa3a"},
+    {file = "rdkit_pypi-2021.9.2.1-cp36-cp36m-win_amd64.whl", hash = "sha256:bb9aa8fc4e5a19cb12967e3eb1f82e050ecd25feede74e14411ea34f7013c899"},
+    {file = "rdkit_pypi-2021.9.2.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:964c758c1e4bb8bf8c53becc9a6fd6a83b9f338f66ce4ea3edc7b959e31d0d7e"},
+    {file = "rdkit_pypi-2021.9.2.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b8a68cf340f90c3ef97006d59bb4a5030617527e867d0eee744a7561cbb86ab"},
+    {file = "rdkit_pypi-2021.9.2.1-cp37-cp37m-win_amd64.whl", hash = "sha256:215911fed139289725557b63af8313a50f18c390d790f97bb5e1c82fe71356b9"},
+    {file = "rdkit_pypi-2021.9.2.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:35c6de20dc8b80e17cb5b3cb8238c2d31b461df8515871a5f22c76cf80748369"},
+    {file = "rdkit_pypi-2021.9.2.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c9c540e4091ca5628007bcd2959a48af6ae46e0c8f6b224a282c1b7575316f33"},
+    {file = "rdkit_pypi-2021.9.2.1-cp38-cp38-win_amd64.whl", hash = "sha256:8fd30f58be0187df25a96bdc68331720a5f2d0dbb2c8cfafe2ee8e9f17f08c02"},
+    {file = "rdkit_pypi-2021.9.2.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:4ca849811d3e1e99a5edd8ef0e49bd701d003bc46ec942715b060085e5e32234"},
+    {file = "rdkit_pypi-2021.9.2.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6d118e383cdcb533965b34904d60ed433b34c39c4719f0e1a3a9d6c5ff6b44da"},
+    {file = "rdkit_pypi-2021.9.2.1-cp39-cp39-win_amd64.whl", hash = "sha256:3aebb05ceaa11d0ec60c6dc51b11fa27fe3c5a0ed7c7ead4d22d3f6a0f137b60"},
 ]
 requests = [
     {file = "requests-2.26.0-py2.py3-none-any.whl", hash = "sha256:6c1246513ecd5ecd4528a0906f910e8f0f9c6b8ec72030dc9fd154dc1a6efd24"},
