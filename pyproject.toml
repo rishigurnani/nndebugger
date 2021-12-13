@@ -15,6 +15,7 @@ torch-sparse = {url = "https://data.pyg.org/whl/torch-1.9.0%2Bcu102/torch_sparse
 torch-geometric = "^2.0.2"
 rdkit-pypi = "^2021.9.2"
 pytest = "^6.2.5"
+ipykernel = "^6.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
