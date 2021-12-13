@@ -23,19 +23,6 @@ autograd.profiler.profile(False)
 autograd.profiler.emit_nvtx(False)
 np.set_printoptions(precision=3)
 
-def grad_check(model, file_name):
-    """
-    Check gradients of model
-    """
-    try:
-        if k.SAVE_GRAD_IMG:
-            utils.plot_grad_flow(model.named_parameters(), filename=file_name)
-        else:
-            print("\nPlotting of gradients skipped")
-    except:
-        print("Error: None-type gradients detected", flush=True)
-        raise
-
 class DebugSession:
     """
     A class to run Debugging of neural nets
@@ -456,18 +443,6 @@ class DebugSession:
                 )
 
                 # end of one epoch
-            if k.SAVE_GRAD_IMG:
-                utils.plot_grad_flow(
-                    model.named_parameters(),
-                    filename="big_model_%s_grad_check.png" % model_n,
-                )
-                print(
-                    "..Set of gradients plotted to big_model_%s_grad_check.png"
-                    % model_n,
-                    flush=True,
-                )
-            else:
-                print("..Plotting of gradients skipped")
             if overfit:
                 break
             # OK, we did not do good enough to overfit the data. But,
@@ -498,44 +473,28 @@ class DebugSession:
         self.non_negative = self.is_non_negative()
         self.target_abs_mean = stack([x.y for x in self.data_set]).abs().mean().item()
         print("\ntarget_abs_mean %s \n" % self.target_abs_mean, flush=True)
-        self.test_target_abs_mean(min_model, self.target_abs_mean)
+        self.test_target_abs_mean(self.target_abs_mean)
         if self.do_test_output_shape:
             assert self.test_output_shape()
             print(
                 "\nVerified that shape of model predictions is equal to shape of labels\n",
                 flush=True,
             )
-        grad_check(min_model, file_name="first_grad_check.png")
-        print("\nSet of gradients plotted to first_grad_check.png\n", flush=True)
-
-        min_model = self.model_class_ls[0]()  # re-instantiate model
-        min_model.to(self.device)
 
         if self.do_test_input_independent_baseline:
-            assert self.test_input_independent_baseline(min_model)
+            assert self.test_input_independent_baseline()
             print("Input-independent baseline is verified\n", flush=True)
 
-        min_model = self.model_class_ls[0]()  # re-instantiate model
-        min_model.to(self.device)
-        if self.is_non_negative and hasattr(min_model, "init_bias"):
-            min_model.init_bias(self.target_abs_mean)
-
         if self.do_test_overfit_small_batch:
-            assert self.test_overfit_small_batch(min_model)
-
-        min_model = self.model_class_ls[0]()  # re-instantiate model
-        min_model.to(self.device)
+            assert self.test_overfit_small_batch()
 
         if self.do_visualize_large_batch_training:
-            self.visualize_large_batch_training(min_model)
+            self.visualize_large_batch_training()
         grad_check(min_model, file_name="second_grad_check.png")
         print("\nSet of gradients plotted to second_grad_check.png\n", flush=True)
 
-        min_model = self.model_class_ls[0]()  # re-instantiate model
-        min_model.to(self.device)
-
         if self.do_chart_dependencies:
-            assert self.chart_dependencies(min_model)
+            assert self.chart_dependencies()
 
         if self.do_choose_model_size_by_overfit:
             best_capacity = self.choose_model_size_by_overfit()
