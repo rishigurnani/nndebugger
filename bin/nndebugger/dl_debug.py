@@ -164,7 +164,7 @@ class DebugSession:
         data = data.to(self.device)  # assigned to self for test_output_shape
         output = model(data)
 
-        return output.shape == data.y.shape
+        return (output.shape == data.y.shape, output.shape, data.y.shape)
 
     def test_input_independent_baseline(self):
         """
@@ -475,7 +475,8 @@ class DebugSession:
         print("\ntarget_abs_mean %s \n" % self.target_abs_mean, flush=True)
         self.test_target_abs_mean(self.target_abs_mean)
         if self.do_test_output_shape:
-            assert self.test_output_shape()
+            result, output_shape, y_shape = self.test_output_shape()
+            assert result, f"The model output shape {output_shape} and label shape {y_shape} are not the same"
             print(
                 "\nVerified that shape of model predictions is equal to shape of labels\n",
                 flush=True,
@@ -490,8 +491,6 @@ class DebugSession:
 
         if self.do_visualize_large_batch_training:
             self.visualize_large_batch_training()
-        grad_check(min_model, file_name="second_grad_check.png")
-        print("\nSet of gradients plotted to second_grad_check.png\n", flush=True)
 
         if self.do_chart_dependencies:
             assert self.chart_dependencies()

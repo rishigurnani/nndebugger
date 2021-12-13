@@ -86,7 +86,8 @@ def test_output_shape_pass(example_data):
         example_data['device'], 
         do_test_output_shape=True
     )
-    assert ds.test_output_shape()
+    result, _, _ = ds.test_output_shape()
+    assert result
 
 def test_output_shape_fail(example_data):
     '''
@@ -102,4 +103,5 @@ def test_output_shape_fail(example_data):
         example_data['device'], 
         do_test_output_shape=True
     )
-    assert not ds.test_output_shape()
+    result, _, _ = ds.test_output_shape()
+    assert not result
