@@ -1,9 +1,10 @@
 import copy
 import random
-import time 
+import time
 import numpy as np
 from torch import cuda, manual_seed, optim, tensor, stack, backends, autograd, float16
 from torch_geometric.loader import DataLoader
+
 backends.cudnn.benchmark = True
 
 from . import torch_utils as utils
@@ -17,11 +18,12 @@ np.random.seed(k.RANDOM_SEED)
 
 
 # I read that these three lines below speed up training. However, keeping
-# them set makes it difficult to do profiling. 
+# them set makes it difficult to do profiling.
 autograd.set_detect_anomaly(False)
 autograd.profiler.profile(False)
 autograd.profiler.emit_nvtx(False)
 np.set_printoptions(precision=3)
+
 
 class DebugSession:
     """
@@ -164,7 +166,10 @@ class DebugSession:
         data = data.to(self.device)  # assigned to self for test_output_shape
         output = model(data)
 
-        return (output.shape == data.y.shape, f"The model output shape {output.shape} and label shape {data.y.shape} are not the same")
+        return (
+            output.shape == data.y.shape,
+            f"The model output shape {output.shape} and label shape {data.y.shape} are not the same",
+        )
 
     def test_input_independent_baseline(self):
         """
@@ -185,9 +190,7 @@ class DebugSession:
             self.loss_fn,
         )
         print(
-            "..last epoch real_data_loss", 
-            loss_history[-1], 
-            flush=True
+            "..last epoch real_data_loss", loss_history[-1], flush=True
         )  # loss for all points in final epoch gets printed
 
         zero_loss_history = self.trainer(
@@ -200,14 +203,14 @@ class DebugSession:
             self.loss_fn,
         )
         print(
-            "..last epoch zero_data_loss", 
-            zero_loss_history[-1], 
-            flush=True
+            "..last epoch zero_data_loss", zero_loss_history[-1], flush=True
         )  # loss for all points in 5th epoch gets printed
-        message = '''The loss of zeroed inputs is nearly the same as the loss of
+        message = """The loss of zeroed inputs is nearly the same as the loss of
                     real inputs. This may indicate that your model is not learning anything
-                    during training. Check your trainer function and your model architecture.'''
-        return (loss_history[-1] / zero_loss_history[-1]) < k.DL_DBG_IIB_THRESHOLD, message
+                    during training. Check your trainer function and your model architecture."""
+        return (
+            loss_history[-1] / zero_loss_history[-1]
+        ) < k.DL_DBG_IIB_THRESHOLD, message
 
     def test_overfit_small_batch(self):
         """
@@ -222,7 +225,7 @@ class DebugSession:
             self.data_set[0 : k.DL_DBG_OVERFIT_BS],
             batch_size=k.DL_DBG_OVERFIT_BS,
             shuffle=True,
-            drop_last=True,          
+            drop_last=True,
         )
         model.train()
         overfit = False
@@ -241,18 +244,16 @@ class DebugSession:
                     print("..Epoch", epoch)
                     print("....Outputs", y_hat)
                     print("....Labels ", y)
-                    print(
-                        "....Loss:", 
-                        np.sqrt([loss.item()])
-                    )
-                    print(
-                        "....R2:", r2
-                    )
+                    print("....Loss:", np.sqrt([loss.item()]))
+                    print("....R2:", r2)
                     if r2 > k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH:
                         overfit = True
 
-        return overfit, f'''Error: Your model was not able to overfit a small batch 
-            of data. The maximum R2 over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}'''
+        return (
+            overfit,
+            f"""Error: Your model was not able to overfit a small batch 
+            of data. The maximum R2 over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}""",
+        )
 
     def visualize_large_batch_training(self):
         """
@@ -262,7 +263,10 @@ class DebugSession:
         model, optimizer = self.initialize_training(self.model_class_ls[0])
         model = model.to(self.device)
         train_loader = DataLoader(
-            self.data_set, batch_size=k.DL_DBG_VIS_BS, shuffle=False, drop_last=True,
+            self.data_set,
+            batch_size=k.DL_DBG_VIS_BS,
+            shuffle=False,
+            drop_last=True,
         )
         model.train()
         min_loss = np.inf
@@ -277,23 +281,12 @@ class DebugSession:
                 optimizer.step()
                 if ind == 0:
                     print("..Epoch %s" % epoch)
-                    print(
-                        "....Outputs", output.flatten().detach().cpu().numpy()
-                    )
-                    print(
-                        "....Labels ", data.y.flatten().detach().cpu().numpy()
-                    )
-                    print(
-                        "....Loss:", 
-                        np.sqrt([loss.item()])
-                    )
+                    print("....Outputs", output.flatten().detach().cpu().numpy())
+                    print("....Labels ", data.y.flatten().detach().cpu().numpy())
+                    print("....Loss:", np.sqrt([loss.item()]))
                     if loss < min_loss:
                         min_loss = loss
-                    print(
-                        "....Best loss:", 
-                        np.sqrt([min_loss.item()]), 
-                        flush=True
-                    )
+                    print("....Best loss:", np.sqrt([min_loss.item()]), flush=True)
         print("Visualization complete \n", flush=True)
 
     def chart_dependencies(self):
@@ -307,7 +300,7 @@ class DebugSession:
             self.data_set[0 : k.DL_DBG_CHART_NSHOW],
             batch_size=k.DL_DBG_CHART_BS,
             shuffle=False,
-            drop_last=False, # if we set drop_last equal to True then it is
+            drop_last=False,  # if we set drop_last equal to True then it is
             # possible for train_loader to be empty. That would mess up
             # this test.
         )
@@ -321,17 +314,9 @@ class DebugSession:
                 loss = output[0].sum()
                 loss.backward()
                 print("..Epoch %s" % epoch)
-                print(
-                    "....Outputs", output.flatten().detach().cpu().numpy()
-                )
-                print(
-                    "....Labels ", data.y.flatten().detach().cpu().numpy()
-                )
-                print(
-                    "....Loss:", 
-                    loss.item(), 
-                    flush=True
-                )
+                print("....Outputs", output.flatten().detach().cpu().numpy())
+                print("....Labels ", data.y.flatten().detach().cpu().numpy())
+                print("....Loss:", loss.item(), flush=True)
 
         if self.model_type == "gnn":
             start_ind = self.data_set[0].x.shape[
@@ -342,7 +327,7 @@ class DebugSession:
         else:
             raise ValueError("Invalid 'model_type' selected")
         message = "Data is getting mixed between instances in the same batch."
-        
+
         return (data.x.grad[start_ind:, :].sum().item() == 0, message)
 
     def initialize_training(self, model_class):
@@ -364,7 +349,9 @@ class DebugSession:
         print("\nBeginning model size search", flush=True)
 
         train_loader = DataLoader(
-            self.data_set, batch_size=self.batch_size, shuffle=True, 
+            self.data_set,
+            batch_size=self.batch_size,
+            shuffle=True,
             drop_last=True,
         )
 
@@ -397,17 +384,13 @@ class DebugSession:
                 rmse, r2 = utils.compute_regression_metrics(y, y_hat, self.multi_task)
                 print("\n....Epoch %s" % epoch)
                 print(f"......[rmse] {rmse} [r2] {r2}")
-                print(
-                    "......Outputs", y_hat[0 : k.DL_DBG_CMS_NSHOW]
-                )
-                print(
-                    "......Labels ", y[0 : k.DL_DBG_CMS_NSHOW]
-                )
+                print("......Outputs", y_hat[0 : k.DL_DBG_CMS_NSHOW])
+                print("......Labels ", y[0 : k.DL_DBG_CMS_NSHOW])
                 end = time.time()
                 print(f"......Total time til this epoch {end-start}")
                 if rmse < min_rmse:
                     # OK, if we reached here then that means the
-                    # updates seen during this epoch yield the 
+                    # updates seen during this epoch yield the
                     # best predictions.
                     min_rmse = rmse
                     max_r2 = r2
@@ -426,10 +409,7 @@ class DebugSession:
                     model, optimizer = self.initialize_training(model_class)
 
                 print(
-                    "......[best rmse] %s [best r2] %s" % (
-                        min_rmse, 
-                        max_r2
-                    ), flush=True
+                    "......[best rmse] %s [best r2] %s" % (min_rmse, max_r2), flush=True
                 )
 
                 # end of one epoch
@@ -446,7 +426,7 @@ class DebugSession:
             % self.capacity_ls[best_model_n],
             flush=True,
         )
-        
+
         return self.capacity_ls[best_model_n]
 
     def is_non_negative(self):
@@ -501,4 +481,4 @@ class DebugSession:
         else:
             best_capacity = None
         print("\nDebug session complete. No errors detected.", flush=True)
-        return 
+        return
