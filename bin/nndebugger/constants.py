@@ -13,6 +13,7 @@ DL_DBG_IIB_EPOCHS = 25 # IIB = input independent baseline
 DL_DBG_IIB_THRESHOLD = .75 # the factor, k = (real_data_loss / zero_data_loss), below which the IIB test will pass
 DL_DBG_IIB_NSHOW = 5
 DL_DBG_OVERFIT_BS = 5
+DL_DBG_OVERFIT_SMALL_EPOCHS = 100
 DL_DBG_OVERFIT_EPOCHS = 1000
 DL_DBG_VIS_BS = 124 # VIS = visualize large batch training
 DL_DBG_CHART_NSHOW = 5 # CHART = chart dependencies

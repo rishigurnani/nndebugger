@@ -164,7 +164,7 @@ class DebugSession:
         data = data.to(self.device)  # assigned to self for test_output_shape
         output = model(data)
 
-        return (output.shape == data.y.shape, output.shape, data.y.shape)
+        return (output.shape == data.y.shape, f"The model output shape {output.shape} and label shape {data.y.shape} are not the same")
 
     def test_input_independent_baseline(self):
         """
@@ -204,7 +204,10 @@ class DebugSession:
             zero_loss_history[-1], 
             flush=True
         )  # loss for all points in 5th epoch gets printed
-        return (loss_history[-1] / zero_loss_history[-1]) >= k.DL_DBG_IIB_THRESHOLD
+        message = '''The loss of zeroed inputs is nearly the same as the loss of
+                    real inputs. This may indicate that your model is not learning anything
+                    during training. Check your trainer function and your model architecture.'''
+        return (loss_history[-1] / zero_loss_history[-1]) < k.DL_DBG_IIB_THRESHOLD, message
 
     def test_overfit_small_batch(self):
         """
@@ -223,7 +226,7 @@ class DebugSession:
         )
         model.train()
         overfit = False
-        for epoch in range(k.DL_DBG_OVERFIT_EPOCHS):
+        for epoch in range(k.DL_DBG_OVERFIT_SMALL_EPOCHS):
             if not overfit:
                 for data in train_loader:  # loop through training batches
                     data = data.to(self.device)
@@ -248,15 +251,8 @@ class DebugSession:
                     if r2 > k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH:
                         overfit = True
 
-        if not overfit:
-            raise ValueError(
-                f"""Error: Your model was not able to overfit a small batch 
-                               of data. The maximum R2 over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}"""
-            )
-        print(
-            f"Verified that a small batch can be overfit since the R2 was greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}\n",
-            flush=True,
-        )
+        return overfit, f'''Error: Your model was not able to overfit a small batch 
+            of data. The maximum R2 over {k.DL_DBG_OVERFIT_EPOCHS} epochs was not greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}'''
 
     def visualize_large_batch_training(self):
         """
@@ -345,15 +341,9 @@ class DebugSession:
             start_ind = 1
         else:
             raise ValueError("Invalid 'model_type' selected")
-        if data.x.grad[start_ind:, :].sum().item() != 0:
-            raise ValueError(
-                "Data is getting mixed between instances in the same batch."
-            )
-
-        print(
-            "Finished charting dependencies. Data is not getting mixed between instances in the same batch.\n",
-            flush=True,
-        )
+        message = "Data is getting mixed between instances in the same batch."
+        
+        return (data.x.grad[start_ind:, :].sum().item() == 0, message)
 
     def initialize_training(self, model_class):
         """
@@ -475,25 +465,36 @@ class DebugSession:
         print("\ntarget_abs_mean %s \n" % self.target_abs_mean, flush=True)
         self.test_target_abs_mean(self.target_abs_mean)
         if self.do_test_output_shape:
-            result, output_shape, y_shape = self.test_output_shape()
-            assert result, f"The model output shape {output_shape} and label shape {y_shape} are not the same"
+            result, message = self.test_output_shape()
+            assert result, message
             print(
                 "\nVerified that shape of model predictions is equal to shape of labels\n",
                 flush=True,
             )
 
         if self.do_test_input_independent_baseline:
-            assert self.test_input_independent_baseline()
+            result, message = self.test_input_independent_baseline()
+            assert result, message
             print("Input-independent baseline is verified\n", flush=True)
 
         if self.do_test_overfit_small_batch:
-            assert self.test_overfit_small_batch()
+            result, message = self.test_overfit_small_batch()
+            assert result, message
+            print(
+                f"Verified that a small batch can be overfit since the R2 was greater than {k.DL_DBG_SUFFICIENT_R2_SMALL_BATCH}\n",
+                flush=True,
+            )
 
         if self.do_visualize_large_batch_training:
             self.visualize_large_batch_training()
 
         if self.do_chart_dependencies:
-            assert self.chart_dependencies()
+            result, message = self.chart_dependencies()
+            assert result, message
+            print(
+                "Finished charting dependencies. Data is not getting mixed between instances in the same batch.\n",
+                flush=True,
+            )
 
         if self.do_choose_model_size_by_overfit:
             best_capacity = self.choose_model_size_by_overfit()
