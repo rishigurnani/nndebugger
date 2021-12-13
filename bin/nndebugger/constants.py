@@ -1,4 +1,4 @@
-# Constants for dl_debug (DL_DBG)
+# Constants for dl_debug (DL_DBG)!
 RANDOM_SEED = 0
 TRAIN_FRAC = 0.8
 DL_DBG_MAX_EPOCHS = 100
