@@ -125,14 +125,15 @@ class DebugSession:
             self.selector_dim = self.data_set[0].selector.size()[-1]
         self.multi_task = bool(self.selector_dim)
 
-    def test_target_abs_mean(self, model, target_abs_mean):
+    def test_target_abs_mean(self, target_abs_mean):
         """
         Test if all model outputs are near to the mean
         """
+        model, optimizer = self.initialize_training(self.model_class_ls[0])
+        model = model.to(self.device)
         model.train()
         if hasattr(model, "init_bias"):
             model.init_bias(target_abs_mean)
-        optimizer = optim.Adam(model.parameters(), lr=self.r_learn)  # Adam optimization
         train_loader = DataLoader(
             self.data_set,
             batch_size=k.DL_DBG_TEST_MEAN_BS,
@@ -142,37 +143,50 @@ class DebugSession:
         model.train()
         for data in train_loader:  # loop through training batches
             pass
-        self.data = data.to(self.device)  # assigned to self for test_output_shape
+        data = data.to(self.device)  # assigned to self for test_output_shape
         optimizer.zero_grad()
 
-        self.output = model(data)
+        output = model(data)
         if self.target_abs_mean_test:
             print("\nChecking that all outputs are near to the mean", flush=True)
             assert (
-                np.max(np.abs(target_abs_mean - self.output.detach().cpu().numpy()))
+                np.max(np.abs(target_abs_mean - output.detach().cpu().numpy()))
                 / target_abs_mean
             ) < k.DL_DBG_TEST_MEAN_EPS  # the absolute deviation from the mean should be <.1
             print("Verified that all outputs are near to the mean\n", flush=True)
 
-        loss = self.loss_fn(self.output, data)
+        loss = self.loss_fn(output, data)
         loss.backward()
 
     def test_output_shape(self):
         """
         The shape of the model output should match the shape of the labels.
         """
-        assert self.output.shape == self.data.y.shape
-        print(
-            "\nVerified that shape of model predictions is equal to shape of labels\n",
-            flush=True,
+        model, optimizer = self.initialize_training(self.model_class_ls[0])
+        model = model.to(self.device)
+        model.train()
+        train_loader = DataLoader(
+            self.data_set,
+            batch_size=k.DL_DBG_TEST_MEAN_BS,
+            shuffle=True,
+            drop_last=False,
         )
+        model.train()
+        for data in train_loader:  # loop through training batches
+            pass
+        data = data.to(self.device)  # assigned to self for test_output_shape
+        output = model(data)
 
-    def test_input_independent_baseline(self, model):
+        return output.shape == data.y.shape
+
+    def test_input_independent_baseline(self):
         """
         The loss of the model should be lower when real features are
         passed in than when zeroed features are passed in.
         """
         print("\nChecking input-independent baseline", flush=True)
+        model, optimizer = self.initialize_training(self.model_class_ls[0])
+        model = model.to(self.device)
         zero_model = copy.deepcopy(model)  # deepcopy the model before training
         loss_history = self.trainer(
             model,
@@ -203,28 +217,23 @@ class DebugSession:
             zero_loss_history[-1], 
             flush=True
         )  # loss for all points in 5th epoch gets printed
-        if loss_history[-1] / zero_loss_history[-1] >= k.DL_DBG_IIB_THRESHOLD:
-            raise ValueError(
-                """The loss of zeroed inputs is nearly the same as the loss of 
-                    real inputs. This may indicate that your model is not learning anything 
-                    during training. Check your trainer function and your model architecture."""
-            )
-        print("Input-independent baseline is verified\n", flush=True)
+        return (loss_history[-1] / zero_loss_history[-1]) >= k.DL_DBG_IIB_THRESHOLD
 
-    def test_overfit_small_batch(self, model):
+    def test_overfit_small_batch(self):
         """
         If you hope to learn a good map on your whole data set using
         model archicture A, then A should have enough capacity to
         completely overfit a small batch of the data set.
         """
         print("\nChecking if a small batch can be overfit", flush=True)
+        model, optimizer = self.initialize_training(self.model_class_ls[0])
+        model = model.to(self.device)
         train_loader = DataLoader(
             self.data_set[0 : k.DL_DBG_OVERFIT_BS],
             batch_size=k.DL_DBG_OVERFIT_BS,
             shuffle=True,
             drop_last=True,          
         )
-        optimizer = optim.Adam(model.parameters(), lr=self.r_learn)  # Adam optimization
         model.train()
         overfit = False
         for epoch in range(k.DL_DBG_OVERFIT_EPOCHS):
@@ -262,15 +271,16 @@ class DebugSession:
             flush=True,
         )
 
-    def visualize_large_batch_training(self, model):
+    def visualize_large_batch_training(self):
         """
         Visualize how training proceeds on a large batch of data
         """
         print("\nStarting visualization of training on one large batch", flush=True)
+        model, optimizer = self.initialize_training(self.model_class_ls[0])
+        model = model.to(self.device)
         train_loader = DataLoader(
             self.data_set, batch_size=k.DL_DBG_VIS_BS, shuffle=False, drop_last=True,
         )
-        optimizer = optim.Adam(model.parameters(), lr=self.r_learn)  # Adam optimization
         model.train()
         min_loss = np.inf
         n_epochs = self.choose_model_epochs // 2
@@ -303,12 +313,13 @@ class DebugSession:
                     )
         print("Visualization complete \n", flush=True)
 
-    def chart_dependencies(self, model):
+    def chart_dependencies(self):
         """
         Check that the forward method does not mix information from separate instances.
         """
         print("\nBeginning to chart dependencies", flush=True)
-
+        model, optimizer = self.initialize_training(self.model_class_ls[0])
+        model = model.to(self.device)
         train_loader = DataLoader(
             self.data_set[0 : k.DL_DBG_CHART_NSHOW],
             batch_size=k.DL_DBG_CHART_BS,
@@ -317,7 +328,6 @@ class DebugSession:
             # possible for train_loader to be empty. That would mess up
             # this test.
         )
-        optimizer = optim.Adam(model.parameters(), lr=self.r_learn)  # Adam optimization
         model.train()
         for epoch in range(1):
             for data in train_loader:  # loop through training batches
@@ -485,14 +495,16 @@ class DebugSession:
         """
         Call this method to perform the tests
         """
-        min_model = self.model_class_ls[0]()  # instantiate model
-        min_model.to(self.device)
         self.non_negative = self.is_non_negative()
         self.target_abs_mean = stack([x.y for x in self.data_set]).abs().mean().item()
         print("\ntarget_abs_mean %s \n" % self.target_abs_mean, flush=True)
         self.test_target_abs_mean(min_model, self.target_abs_mean)
         if self.do_test_output_shape:
-            self.test_output_shape()
+            assert self.test_output_shape()
+            print(
+                "\nVerified that shape of model predictions is equal to shape of labels\n",
+                flush=True,
+            )
         grad_check(min_model, file_name="first_grad_check.png")
         print("\nSet of gradients plotted to first_grad_check.png\n", flush=True)
 
@@ -500,7 +512,8 @@ class DebugSession:
         min_model.to(self.device)
 
         if self.do_test_input_independent_baseline:
-            self.test_input_independent_baseline(min_model)
+            assert self.test_input_independent_baseline(min_model)
+            print("Input-independent baseline is verified\n", flush=True)
 
         min_model = self.model_class_ls[0]()  # re-instantiate model
         min_model.to(self.device)
@@ -508,7 +521,7 @@ class DebugSession:
             min_model.init_bias(self.target_abs_mean)
 
         if self.do_test_overfit_small_batch:
-            self.test_overfit_small_batch(min_model)
+            assert self.test_overfit_small_batch(min_model)
 
         min_model = self.model_class_ls[0]()  # re-instantiate model
         min_model.to(self.device)
@@ -522,7 +535,7 @@ class DebugSession:
         min_model.to(self.device)
 
         if self.do_chart_dependencies:
-            self.chart_dependencies(min_model)
+            assert self.chart_dependencies(min_model)
 
         if self.do_choose_model_size_by_overfit:
             best_capacity = self.choose_model_size_by_overfit()

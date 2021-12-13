@@ -74,7 +74,7 @@ def example_data():
 
 def test_output_shape_pass(example_data):
     '''
-    This test should pass since it uses a bug-free model
+    This output of ds.test_output_shape() should be True since we use a bug-free model
     '''
     ds = dl_debug.DebugSession(
         example_data['correct_model_class_ls'], 
@@ -86,11 +86,11 @@ def test_output_shape_pass(example_data):
         example_data['device'], 
         do_test_output_shape=True
     )
-    ds.main()
+    assert ds.test_output_shape()
 
 def test_output_shape_fail(example_data):
     '''
-    This test should NOT pass since it uses a buggy model
+    This output of ds.test_output_shape() should be False since we use a buggy model
     '''
     ds = dl_debug.DebugSession(
         example_data['buggy_model_class_ls'], 
@@ -102,4 +102,4 @@ def test_output_shape_fail(example_data):
         example_data['device'], 
         do_test_output_shape=True
     )
-    not ds.main()
+    assert not ds.test_output_shape()
