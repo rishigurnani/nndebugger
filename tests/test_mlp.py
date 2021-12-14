@@ -18,7 +18,12 @@ from torch_geometric.data import Data
 from nndebugger import constants, loss, dl_debug
 from nndebugger import __version__
 from .utils_test import (
-    featurize_smiles, MyNet, BuggyNet1, BuggyNet2, trainer, buggy_trainer
+    featurize_smiles,
+    MyNet,
+    BuggyNet1,
+    BuggyNet2,
+    trainer,
+    buggy_trainer,
 )
 
 # set seeds for reproducibility
@@ -120,9 +125,10 @@ def test_output_shape_fail(example_data):
     result, _ = ds.test_output_shape()
     assert not result
 
+
 def test_input_independent_baseline_pass(example_data):
     """
-    The output of ds.test_input_independent_baseline() should be True 
+    The output of ds.test_input_independent_baseline() should be True
     since we are using a trainer without bugs
     """
     ds = dl_debug.DebugSession(
@@ -133,15 +139,16 @@ def test_input_independent_baseline_pass(example_data):
         example_data["zero_data_set"],
         example_data["loss_fn"],
         example_data["device"],
-        do_test_input_independent_baseline=True, 
-        trainer=trainer
+        do_test_input_independent_baseline=True,
+        trainer=trainer,
     )
     result, _ = ds.test_input_independent_baseline()
     assert result
 
+
 def test_input_independent_baseline_fail(example_data):
     """
-    The output of ds.test_input_independent_baseline() should be False 
+    The output of ds.test_input_independent_baseline() should be False
     since we are using a buggy trainer
     """
     ds = dl_debug.DebugSession(
@@ -152,15 +159,16 @@ def test_input_independent_baseline_fail(example_data):
         example_data["zero_data_set"],
         example_data["loss_fn"],
         example_data["device"],
-        do_test_input_independent_baseline=True, 
-        trainer=buggy_trainer
+        do_test_input_independent_baseline=True,
+        trainer=buggy_trainer,
     )
     result, _ = ds.test_input_independent_baseline()
     assert not result
 
+
 def test_overfit_small_batch_pass(example_data):
     """
-    The output of ds.test_overfit_small_batch() should be True since we are 
+    The output of ds.test_overfit_small_batch() should be True since we are
     using a good model
     """
     ds = dl_debug.DebugSession(
@@ -171,15 +179,16 @@ def test_overfit_small_batch_pass(example_data):
         example_data["zero_data_set"],
         example_data["loss_fn"],
         example_data["device"],
-        do_test_overfit_small_batch=True, 
-        trainer=trainer
+        do_test_overfit_small_batch=True,
+        trainer=trainer,
     )
     result, _ = ds.test_overfit_small_batch()
     assert result
 
+
 def test_overfit_small_batch_fail(example_data):
     """
-    The output of ds.test_overfit_small_batch() should be True since we are 
+    The output of ds.test_overfit_small_batch() should be True since we are
     using a good model
     """
     ds = dl_debug.DebugSession(
@@ -190,8 +199,8 @@ def test_overfit_small_batch_fail(example_data):
         example_data["zero_data_set"],
         example_data["loss_fn"],
         example_data["device"],
-        do_test_overfit_small_batch=True, 
-        trainer=trainer
+        do_test_overfit_small_batch=True,
+        trainer=trainer,
     )
     result, _ = ds.test_overfit_small_batch()
     assert not result
