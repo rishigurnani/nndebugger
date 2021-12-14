@@ -5,9 +5,8 @@ import pandas as pd
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from torch import tensor, cuda, manual_seed, zeros, nn, optim
+from torch import tensor, cuda, manual_seed, zeros
 from torch import float as torch_float
-from torch_geometric.loader import DataLoader
 from torch import device as torch_device
 import random
 from sklearn.model_selection import train_test_split
@@ -16,7 +15,9 @@ from torch_geometric.data import Data
 # nndebugger functions
 from nndebugger import constants, loss, dl_debug
 from nndebugger import __version__
-from .utils_test import featurize_smiles, MyNet, BuggyNet
+from .utils_test import (
+    featurize_smiles, MyNet, BuggyNet1, BuggyNet2, trainer, buggy_trainer
+)
 
 # set seeds for reproducibility
 random.seed(constants.RANDOM_SEED)
@@ -72,8 +73,11 @@ def example_data():
         "zero_data_set": [Data(x=zeros((1, n_features)), y=x.y) for x in train_X],
         "loss_fn": loss_fn,
         "device": torch_device("cuda" if cuda.is_available() else "cpu"),
-        "buggy_model_class_ls": [
-            lambda: BuggyNet(n_features, 1, capacity) for capacity in capacity_ls
+        "BuggyNet1_class_ls": [
+            lambda: BuggyNet1(n_features, 1, capacity) for capacity in capacity_ls
+        ],
+        "BuggyNet2_class_ls": [
+            lambda: BuggyNet2(n_features, 1, capacity) for capacity in capacity_ls
         ],
     }
 
@@ -101,7 +105,7 @@ def test_output_shape_fail(example_data):
     This output of ds.test_output_shape() should be False since we use a buggy model
     """
     ds = dl_debug.DebugSession(
-        example_data["buggy_model_class_ls"],
+        example_data["BuggyNet1_class_ls"],
         example_data["model_type"],
         example_data["capacity_ls"],
         example_data["data_set"],
@@ -111,4 +115,80 @@ def test_output_shape_fail(example_data):
         do_test_output_shape=True,
     )
     result, _ = ds.test_output_shape()
+    assert not result
+
+def test_input_independent_baseline_pass(example_data):
+    """
+    The output of ds.test_input_independent_baseline() should be True 
+    since we are using a trainer without bugs
+    """
+    ds = dl_debug.DebugSession(
+        example_data["correct_model_class_ls"],
+        example_data["model_type"],
+        example_data["capacity_ls"],
+        example_data["data_set"],
+        example_data["zero_data_set"],
+        example_data["loss_fn"],
+        example_data["device"],
+        do_test_input_independent_baseline=True, 
+        trainer=trainer
+    )
+    result, _ = ds.test_input_independent_baseline()
+    assert result
+
+def test_input_independent_baseline_fail(example_data):
+    """
+    The output of ds.test_input_independent_baseline() should be False 
+    since we are using a buggy trainer
+    """
+    ds = dl_debug.DebugSession(
+        example_data["correct_model_class_ls"],
+        example_data["model_type"],
+        example_data["capacity_ls"],
+        example_data["data_set"],
+        example_data["zero_data_set"],
+        example_data["loss_fn"],
+        example_data["device"],
+        do_test_input_independent_baseline=True, 
+        trainer=buggy_trainer
+    )
+    result, _ = ds.test_input_independent_baseline()
+    assert not result
+
+def test_overfit_small_batch_pass(example_data):
+    """
+    The output of ds.test_overfit_small_batch() should be True since we are 
+    using a good model
+    """
+    ds = dl_debug.DebugSession(
+        example_data["correct_model_class_ls"],
+        example_data["model_type"],
+        example_data["capacity_ls"],
+        example_data["data_set"],
+        example_data["zero_data_set"],
+        example_data["loss_fn"],
+        example_data["device"],
+        do_test_overfit_small_batch=True, 
+        trainer=trainer
+    )
+    result, _ = ds.test_overfit_small_batch()
+    assert result
+
+def test_overfit_small_batch_fail(example_data):
+    """
+    The output of ds.test_overfit_small_batch() should be True since we are 
+    using a good model
+    """
+    ds = dl_debug.DebugSession(
+        example_data["BuggyNet2_class_ls"],
+        example_data["model_type"],
+        example_data["capacity_ls"],
+        example_data["data_set"],
+        example_data["zero_data_set"],
+        example_data["loss_fn"],
+        example_data["device"],
+        do_test_overfit_small_batch=True, 
+        trainer=trainer
+    )
+    result, _ = ds.test_overfit_small_batch()
     assert not result
