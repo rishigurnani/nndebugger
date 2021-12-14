@@ -5,7 +5,7 @@ description = ""
 authors = ["Rishi Gurnani <rgurnani96@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "3.7.3"
+python = "3.7.12"
 numpy = "^1.21.4"
 
 [tool.poetry.dev-dependencies]
