@@ -8,7 +8,7 @@ from torch import tensor
 from torch import float as torch_float
 
 from .test_mlp import example_data
-from .utils_test import featurize_smiles_by_atom, GraphNet1
+from .utils_test import featurize_smiles_by_atom, GraphNet1, BuggyGraphNet1
 from nndebugger import constants, dl_debug
 
 
@@ -53,6 +53,10 @@ def example_gnn_data(example_data):
             for capacity in example_data["capacity_ls"]
         ],  # a list of models that are bug free!
         "dataset": dataset,
+        "BuggyGraphNet1_class_ls": [
+            lambda: BuggyGraphNet1(projector_dim, 1, capacity, n_features, max_n_atoms)
+            for capacity in example_data["capacity_ls"]
+        ], # a list of models that are buggy!
     }
 
 
@@ -73,3 +77,22 @@ def test_chart_dependencies_pass(example_gnn_data, example_data):
     result, _ = ds.chart_dependencies()
 
     assert result
+
+
+def test_chart_dependencies_fail(example_gnn_data, example_data):
+    """
+    The output of ds.chart_dependencies() should be False since we are using a buggy model
+    """
+    ds = dl_debug.DebugSession(
+        example_gnn_data["BuggyGraphNet1_class_ls"],
+        "gnn",
+        example_data["capacity_ls"],
+        example_gnn_data["dataset"],
+        None,
+        example_data["loss_fn"],
+        example_data["device"],
+        do_chart_dependencies=True,
+    )
+    result, _ = ds.chart_dependencies()
+
+    assert not result
