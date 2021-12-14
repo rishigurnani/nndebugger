@@ -3,7 +3,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from torch import nn
 
-from bin.nndebugger import torch_utils as utils
+from nndebugger import torch_utils as utils
 
 def featurize_smiles(smile, n_features):
     smile = smile.replace('*', 'H')

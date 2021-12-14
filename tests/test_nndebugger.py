@@ -13,8 +13,8 @@ from sklearn.model_selection import train_test_split
 from torch_geometric.data import Data
 
 # nndebugger functions
-from bin.nndebugger import constants, loss, dl_debug
-from bin.nndebugger import __version__
+from nndebugger import constants, loss, dl_debug
+from nndebugger import __version__
 from .utils_test import featurize_smiles, MyNet, BuggyNet
 
 # set seeds for reproducibility
