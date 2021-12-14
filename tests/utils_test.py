@@ -159,3 +159,60 @@ class BuggyNet2(nn.Module):
                 x = self.sigmoid(x) # Spoiler! The "bug" is here.
    
         return x.view(data.num_graphs,) 
+
+def featurize_smiles_by_atom(smile, feature_dict, max_n_atoms, n_features):
+    smile = smile.replace('*', 'H')
+    mol = Chem.MolFromSmiles(smile)
+    features = np.zeros((max_n_atoms, n_features))
+    for ind,atom in enumerate(mol.GetAtoms()):
+        atom_feature = feature_dict[atom.GetSymbol()]
+        features[ind, :] = atom_feature
+
+    return features
+
+class GraphNet1(nn.Module):
+    
+    def __init__(self, input_dim, output_dim, capacity, n_features, max_n_atoms):
+
+        super().__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.n_hidden = capacity
+        self.n_features = n_features
+        self.max_n_atoms = max_n_atoms
+
+        self.layers = nn.ModuleList()
+        unit_sequence = utils.unit_sequence(self.input_dim, 
+                                            self.output_dim, 
+                                            self.n_hidden)
+        self.node_projector = nn.Linear(
+            self.n_features, self.input_dim
+        )
+        self.relu = nn.ReLU()
+        # set up hidden layers
+        for ind,n_units in enumerate(unit_sequence[:-2]):
+            size_out_ = unit_sequence[ind+1]
+            layer = nn.Linear(n_units, size_out_)
+            self.layers.append(layer)
+
+        # set up output layer
+        size_in_ = unit_sequence[-2]
+        size_out_ = unit_sequence[-1]
+        layer = nn.Linear(size_in_, size_out_)
+        self.layers.append(layer)
+    
+    def forward(self, data):
+        x = data.x
+        x = x.view(
+            data.num_graphs, self.max_n_atoms, self.n_features
+        )
+        x = self.node_projector(x)
+        x_mean = x.mean(dim=2)
+        x = x - x_mean[:, :, None] # make use of broadcasting
+        x = x.sum(dim=1)
+        for i in range(len(self.layers)):
+            x = self.layers[i](x)
+            if i < (self.n_hidden - 1):
+                x = self.relu(x)
+   
+        return x.view(data.num_graphs,)
