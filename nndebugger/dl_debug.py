@@ -55,26 +55,26 @@ class DebugSession:
         trainer=utils.trainer,
     ):
         """
-        Keyword Arguments:
-        model_class_ls - A list of functions that return a PyTorch nn.Module instance
-        capacity_ls - A list of the capacity of each function in model_class_ls
-        model_type - 'mlp' if the multi-layer perceptrons are contained
-        in model_class_ls or 'gnn' if graph neural networks are contained
-        in model_class_ls
-        data_set - A list of Data instances. Each
-        Data instance should at least have an attribute 'x' which points
-        to features and an attribute 'y' which points to the label
-        loss_fn - An nn.Module instance. The instance should have
-        a forward method that takes in two arguments, 'predictions' and
-        'data'. The forward method should return a scalar.
-        device - A PyTorch device.
-        r_learn - A scalar indicating the learning rate that will be used.
-        batch_size - An integer indicating the batch size that will be used.
-        choose_model_epochs - An integer indicating the number of epochs
-        that will be used in 'choose_model_size_by_overfit'
-        trainer - A function that optimizes weights over several epochs
-        and returns a record of the loss over every epoch. See 'trainer'
-        in torch_utils.py for example inputs & outputs.
+        Keyword Arguments
+            model_class_ls: A list of functions that return a PyTorch nn.Module instance
+            capacity_ls: A list of the capacity of each function in model_class_ls
+            model_type: 'mlp' if the multi-layer perceptrons are contained
+                in model_class_ls or 'gnn' if graph neural networks are contained
+                in model_class_ls
+            data_set: A list of Data instances. Each
+                Data instance should at least have an attribute 'x' which points
+                to features and an attribute 'y' which points to the label
+            loss_fn: An nn.Module instance. The instance should have
+                a forward method that takes in two arguments, 'predictions' and
+                'data'. The forward method should return a scalar.
+            device: A PyTorch device.
+            r_learn: A scalar indicating the learning rate that will be used.
+            batch_size: An integer indicating the batch size that will be used.
+            choose_model_epochs: An integer indicating the number of epochs
+                that will be used in 'choose_model_size_by_overfit'
+            trainer: A function that optimizes weights over several epochs
+                and returns a record of the loss over every epoch. See 'trainer'
+                in torch_utils.py for example inputs & outputs.
         """
         self.do_test_output_shape = do_test_output_shape
         self.do_test_input_independent_baseline = do_test_input_independent_baseline
