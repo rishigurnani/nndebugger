@@ -204,3 +204,59 @@ def test_overfit_small_batch_fail(example_data):
     )
     result, _ = ds.test_overfit_small_batch()
     assert not result
+
+
+def test_capacity_queue(example_data):
+    capacity_ls = list(range(1, 20))
+    ds = dl_debug.DebugSession(
+        example_data["BuggyNet2_class_ls"] * 7,
+        example_data["model_type"],
+        capacity_ls,
+        example_data["data_set"],
+        example_data["zero_data_set"],
+        example_data["loss_fn"],
+        example_data["device"],
+        do_test_overfit_small_batch=True,
+        trainer=trainer,
+        choose_model_epochs=3,
+    )
+    dummy_r2 = [
+        # capacity 1 epoch results
+        0.9,
+        0.1,
+        0.2,
+        # capacity 2 epoch results
+        0.1,
+        0.8,
+        0.2,
+        # capacity 3 epoch results
+        0.92,
+        0.1,
+        0.1,
+        # capacity 4 epoch results
+        0.2,
+        0.1,
+        0.94,
+        # capacity 5 epoch results
+        0.9,
+        0.1,
+        0.1,
+        # capacity 6 epoch results
+        0.9,
+        0.1,
+        0.1,
+        # capacity 7 epoch results
+        0.2,
+        0.2,
+        0.945,
+    ]
+    true_optimal_capacity = 4
+    dummy_iter = iter(dummy_r2)
+
+    def dummy_trainer(**kwargs):
+        return 0.0, dummy_iter.__next__()
+
+    result_optimal_capacity = ds.choose_model_size_by_overfit(
+        per_epoch_trainer=dummy_trainer, patience=3, delta=0.01
+    )
+    assert result_optimal_capacity == true_optimal_capacity

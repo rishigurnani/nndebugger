@@ -1,9 +1,11 @@
 import copy
+from collections import deque
 import random
 import time
 import numpy as np
 from torch import cuda, manual_seed, optim, tensor, stack, backends, autograd, float16
 from torch_geometric.loader import DataLoader
+from .torch_utils import default_per_epoch_trainer
 
 backends.cudnn.benchmark = True
 
@@ -341,7 +343,9 @@ class DebugSession:
 
         return model, optimizer
 
-    def choose_model_size_by_overfit(self):
+    def choose_model_size_by_overfit(
+        self, per_epoch_trainer=default_per_epoch_trainer, patience=3, delta=0.01
+    ):
         """
         Return the smallest capacity capable of over-fitting the data or
         the capacity with the highest R2.
@@ -359,6 +363,8 @@ class DebugSession:
         max_best_r2 = -np.inf
         best_model_n = None  # index of best model
         overfit = False  # overfit is set to True inside the loop if we overfit the data
+        fedup = False
+        r2_queue = deque(maxlen=patience)
         for model_n, model_class in enumerate(self.model_class_ls):
             if overfit:
                 break
@@ -370,25 +376,16 @@ class DebugSession:
             for epoch in range(self.choose_model_epochs):
                 if overfit:
                     break
-                y = []
-                y_hat = []
-                for _, data in enumerate(train_loader):  # loop through training batches
-                    data = data.to(self.device)
-                    optimizer.zero_grad()
-                    output = model(data)
-                    loss = self.loss_fn(output, data)
-                    loss.backward()
-                    optimizer.step()
-                    y += data.y.flatten().detach().cpu().numpy().tolist()
-                    y_hat += output.flatten().detach().cpu().numpy().tolist()
-                rmse, r2 = utils.compute_regression_metrics(y, y_hat, self.multi_task)
-                print("\n....Epoch %s" % epoch)
-                print(f"......[rmse] {rmse} [r2] {r2}")
-                print("......Outputs", y_hat[0 : k.DL_DBG_CMS_NSHOW])
-                print("......Labels ", y[0 : k.DL_DBG_CMS_NSHOW])
-                end = time.time()
-                print(f"......Total time til this epoch {end-start}")
-                if rmse < min_rmse:
+                rmse, r2 = per_epoch_trainer(
+                    epoch=epoch,
+                    train_loader=train_loader,
+                    model=model,
+                    optimizer=optimizer,
+                    loss_fn=self.loss_fn,
+                    device=self.device,
+                    start=start,
+                )
+                if r2 > max_r2:
                     # OK, if we reached here then that means the
                     # updates seen during this epoch yield the
                     # best predictions.
@@ -414,6 +411,14 @@ class DebugSession:
 
                 # end of one epoch
             if overfit:
+                break
+            r2_queue.append(max_r2)
+            fedup = parse_queue(r2_queue, delta)
+            if fedup:
+                best_model_n = model_n - patience + 1
+                print(
+                    f"The performance of models with capacity {self.capacity_ls[best_model_n+1]} through {self.capacity_ls[model_n]} was not sufficiently better than the performance of the model with capacity {self.capacity_ls[best_model_n]}."
+                )
                 break
             # OK, we did not do good enough to overfit the data. But,
             # if this capacity was the best we have seen yet, take note.
@@ -482,3 +487,13 @@ class DebugSession:
             best_capacity = None
         print("\nDebug session complete. No errors detected.", flush=True)
         return
+
+
+def parse_queue(que, delta):
+    if len(que) == que.maxlen:
+        r2_small_capacity = que[0]
+        r2_big_capacity = max(list(que)[1:])
+        if (r2_big_capacity - r2_small_capacity) < delta:
+            return True
+
+    return False

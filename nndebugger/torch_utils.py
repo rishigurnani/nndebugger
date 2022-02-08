@@ -2,6 +2,8 @@ from torch_geometric.data import DataLoader
 from torch import optim
 import numpy as np
 import sklearn as sk
+import time
+from . import constants as k
 
 
 def unit_sequence(input_dim, output_dim, n_hidden):
@@ -57,3 +59,28 @@ def trainer(model, data_set, batch_size, learning_rate, n_epochs, device, loss_o
         loss_history.append(per_epoch_loss)
 
     return loss_history
+
+
+def default_per_epoch_trainer(
+    epoch, train_loader, model, optimizer, loss_fn, device, start
+):
+    y = []
+    y_hat = []
+    for _, data in enumerate(train_loader):  # loop through training batches
+        data = data.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = loss_fn(output, data)
+        loss.backward()
+        optimizer.step()
+        y += data.y.flatten().detach().cpu().numpy().tolist()
+        y_hat += output.flatten().detach().cpu().numpy().tolist()
+    rmse, r2 = compute_regression_metrics(y, y_hat, False)
+    print("\n....Epoch %s" % epoch)
+    print(f"......[rmse] {rmse} [r2] {r2}")
+    print("......Outputs", y_hat[0 : k.DL_DBG_CMS_NSHOW])
+    print("......Labels ", y[0 : k.DL_DBG_CMS_NSHOW])
+    end = time.time()
+    print(f"......Total time til this epoch {end-start}")
+
+    return rmse, r2

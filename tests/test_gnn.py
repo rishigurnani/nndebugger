@@ -56,7 +56,7 @@ def example_gnn_data(example_data):
         "BuggyGraphNet1_class_ls": [
             lambda: BuggyGraphNet1(projector_dim, 1, capacity, n_features, max_n_atoms)
             for capacity in example_data["capacity_ls"]
-        ], # a list of models that are buggy!
+        ],  # a list of models that are buggy!
     }
 
 
