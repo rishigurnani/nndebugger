@@ -368,7 +368,8 @@ class DebugSession:
         for model_n, model_class in enumerate(self.model_class_ls):
             if overfit:
                 break
-            print("\n..Training model %s \n" % model_n)
+            print(f"\n..Training model {model_n} (with capacity {self.capacity_ls[model_n]}) of {len(self.capacity_ls)}")
+            # print("\n..Training model %s \n" % model_n)
             model, optimizer = self.initialize_training(model_class)
             min_rmse = np.inf  # epoch-wise loss
             max_r2 = -np.inf
