@@ -1,14 +1,19 @@
 # NetDebugger
 
-## Dependencies
-### NNDebugger
-- numpy
-- PyTorch 1.7.1
-- sklearn 0.24.1
-- PyTorch Geometric. Installation instructions at https://pytorch-geometric.readthedocs.io/en/latest/notes/installation.html
-### Tutorial.ipynb
-- pandas 1.1.5
-- rdkit
+## Installation
+This repository is currently set up to run on 1) Mac OSX and 2) Linux/Windows machines with CUDA 10.2. Please raise a GitHub issue if you want to use this repo with a different configuration. Otherwise, please follow these steps for installation:
+
+1. Install [poetry](https://python-poetry.org/) on your machine.
+2. If Python3.7 is installed on your machine skip to step 3, if not you will need to install it. There are many ways to do this, one option is detailed below:
+    * Install [Homebrew](https://brew.sh/) on your machine.
+    * Run `brew install python@3.7`. Take note of the path to the python executable.
+3. Clone this repo on your machine.
+4. Open a terminal at the root directory of this repository.
+5. Run `poetry env use /path/to/python3.7/executable`. If you installed Python3.7 with Homebrew, the path may be something like
+  `/usr/local/Cellar/python\@3.7/3.7.13_1/bin/python3.7`.
+7. Run `poetry install`.
+8. If your machine is a Mac, run `poetry run poe torch-osx`. If not, run `poetry run poe torch-linux_win-cuda102`.
+9. If your machine is a Mac, run `poetry run poe pyg-osx`. If not, run `poetry run poe pyg-linux_win-cuda102`.
 
 ## Example
 Run tutorial.ipynb
