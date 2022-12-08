@@ -236,7 +236,7 @@ test = ["codecov", "coverage", "ipykernel (>=6.5)", "ipython", "mypy", "pre-comm
 
 [[package]]
 name = "jupyter-core"
-version = "4.10.0"
+version = "4.12.0"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 category = "dev"
 optional = false
